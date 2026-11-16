@@ -1,0 +1,568 @@
+<!doctype html>
+<!--
+  ==========================================================================
+  LifeOps — personal life-admin assistant (web interface)
+  --------------------------------------------------------------------------
+  Served by the FastAPI app (app/main.py). Start it with:
+    .venv/bin/uvicorn --factory app.main:create_app --port 8780
+  Styling: assets/css/style.css · Behaviour: assets/js/app.js
+
+  LAYOUT MAP
+    1. login     — shown until you're signed in
+    2. shell     — top bar, views (Today · Inbox · Tasks · Settings), bottom tabs on phones
+    3. overlays  — task dialog, confirm dialog, toast, screen-reader announcer
+  ==========================================================================
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>LifeOps</title>
+    <meta name="description" content="Bills, renewals and warranties turned into clear next steps." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f7f6f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a7a52'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <!-- Home Screen app (M4) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="LifeOps" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script src="assets/js/theme-init.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <svg class="sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+        />
+      </symbol>
+      <symbol id="i-inbox" viewBox="0 0 24 24">
+        <path d="M3 13h5l2 3h4l2-3h5" />
+        <path d="M5 5h14l2 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z" />
+      </symbol>
+      <symbol id="i-list" viewBox="0 0 24 24">
+        <path d="M9 6h11M9 12h11M9 18h11" />
+        <path d="m3.5 6 1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17" />
+      </symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+        />
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7" /></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24">
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24">
+        <path d="M12 16V4M7 9l5-5 5 5" />
+        <path d="M5 20h14" />
+      </symbol>
+      <symbol id="i-theme" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+      </symbol>
+    </svg>
+
+    <a class="skip-link" href="#main">Skip to content</a>
+    <noscript><p class="noscript">LifeOps needs JavaScript. Please enable it and reload.</p></noscript>
+
+    <!-- ===================== 1. LOGIN ===================== -->
+    <section id="loginView" class="login" hidden aria-labelledby="loginTitle">
+      <form id="loginForm" class="login-card" novalidate>
+        <p class="brand brand--big"><span class="brand-mark" aria-hidden="true"></span> LifeOps</p>
+        <h1 id="loginTitle" class="login-title">Welcome back</h1>
+        <p class="muted">Your bills, renewals and warranties, turned into clear next steps.</p>
+        <label class="field">
+          <span class="field-label">Username</span>
+          <input
+            id="loginEmail"
+            class="input"
+            type="text"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            required
+          />
+        </label>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input id="loginPassword" class="input" type="password" autocomplete="current-password" required />
+        </label>
+        <p id="loginError" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-primary btn-block" type="submit">Log in</button>
+      </form>
+      <!-- Shown instead of the login when LifeOps has no account yet (only on this computer) -->
+      <form id="setupForm" class="login-card" novalidate hidden aria-labelledby="setupTitle">
+        <p class="brand brand--big"><span class="brand-mark" aria-hidden="true"></span> LifeOps</p>
+        <h1 id="setupTitle" class="login-title">Create your account</h1>
+        <p class="muted">
+          Welcome! This is the first time LifeOps is opened. Choose the username and password you'll log in
+          with.
+        </p>
+        <label class="field">
+          <span class="field-label">Username</span>
+          <input
+            id="setupEmail"
+            class="input"
+            type="text"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            maxlength="32"
+            required
+          />
+          <span class="field-help"
+            >3 to 32 letters or numbers (dots, dashes and underscores are fine), e.g. alex.</span
+          >
+        </label>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input
+            id="setupPassword"
+            class="input"
+            type="password"
+            autocomplete="new-password"
+            minlength="12"
+            required
+          />
+          <span class="field-help">At least 12 characters. A short sentence works well.</span>
+        </label>
+        <label class="field">
+          <span class="field-label">Password again</span>
+          <input id="setupPassword2" class="input" type="password" autocomplete="new-password" required />
+        </label>
+        <p id="setupError" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-primary btn-block" type="submit">Create account</button>
+      </form>
+      <!-- Step 2 when two-step login is on -->
+      <form id="codeForm" class="login-card" novalidate hidden aria-labelledby="codeTitle">
+        <p class="brand brand--big"><span class="brand-mark" aria-hidden="true"></span> LifeOps</p>
+        <h1 id="codeTitle" class="login-title">Enter your code</h1>
+        <p class="muted">
+          Type the 6-digit code from Google Authenticator. Lost your phone? Use a recovery code.
+        </p>
+        <label class="field">
+          <span class="field-label">Code</span>
+          <input
+            id="loginCode"
+            class="input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="20"
+            required
+          />
+        </label>
+        <p id="codeError" class="form-error" role="alert" hidden></p>
+        <button class="btn btn-primary btn-block" type="submit">Continue</button>
+        <button id="codeBack" class="link-btn" type="button">Back</button>
+      </form>
+    </section>
+
+    <!-- ===================== 2. APP SHELL ===================== -->
+    <div id="shell" class="shell" hidden>
+      <header class="topbar">
+        <p class="brand"><span class="brand-mark" aria-hidden="true"></span> LifeOps</p>
+        <nav class="tabs" aria-label="Sections">
+          <a class="tab" href="#/today" data-view="today">
+            <svg class="icon" aria-hidden="true"><use href="#i-sun" /></svg><span>Today</span>
+          </a>
+          <a class="tab" href="#/inbox" data-view="inbox">
+            <svg class="icon" aria-hidden="true"><use href="#i-inbox" /></svg><span>Inbox</span>
+            <span id="inboxBadge" class="badge" hidden></span>
+          </a>
+          <a class="tab" href="#/tasks" data-view="tasks">
+            <svg class="icon" aria-hidden="true"><use href="#i-list" /></svg><span>Tasks</span>
+          </a>
+          <a class="tab" href="#/records" data-view="records">
+            <svg class="icon" aria-hidden="true"><use href="#i-folder" /></svg><span>Records</span>
+          </a>
+          <a class="tab" href="#/settings" data-view="settings">
+            <svg class="icon" aria-hidden="true"><use href="#i-gear" /></svg><span>Settings</span>
+          </a>
+        </nav>
+        <button id="themeBtn" class="icon-btn theme-btn" type="button" aria-label="Theme">
+          <svg class="icon" aria-hidden="true"><use href="#i-theme" /></svg>
+        </button>
+        <button id="logoutBtn" class="link-btn topbar-logout" type="button">Log out</button>
+      </header>
+
+      <main id="main" class="main" tabindex="-1">
+        <!-- TODAY -->
+        <section id="view-today" class="view" aria-labelledby="todayTitle" hidden>
+          <div class="view-head">
+            <div>
+              <p id="todayDate" class="eyebrow"></p>
+              <h1 id="todayTitle" class="view-title">Today</h1>
+            </div>
+            <button class="btn btn-primary" type="button" data-new-task>
+              <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg> Task
+            </button>
+          </div>
+          <!-- Dashboard: four numbers, then tasks, then bills and things expiring (from Records) -->
+          <div id="todayStats" class="stats"></div>
+          <div id="todayGroups" class="groups"></div>
+          <div class="dash-lists">
+            <section aria-labelledby="billsTitle">
+              <h2 id="billsTitle" class="group-title">
+                Bills due <span class="group-sub">next 30 days</span>
+              </h2>
+              <ul id="billsList" class="list"></ul>
+            </section>
+            <section aria-labelledby="expiringTitle">
+              <h2 id="expiringTitle" class="group-title">
+                Expiring soon <span class="group-sub">next 90 days</span>
+              </h2>
+              <ul id="expiringList" class="list"></ul>
+            </section>
+          </div>
+        </section>
+
+        <!-- INBOX -->
+        <section id="view-inbox" class="view" aria-labelledby="inboxTitle" hidden>
+          <div class="view-head">
+            <div>
+              <h1 id="inboxTitle" class="view-title">Inbox</h1>
+            </div>
+          </div>
+          <form id="captureForm" class="capture card" novalidate>
+            <label class="field">
+              <span class="field-label">Jot something down</span>
+              <textarea
+                id="captureText"
+                class="input input--area"
+                rows="3"
+                maxlength="5000"
+                placeholder="e.g. Aircon warranty ends 12 March next year. Remind me a month before."
+                required
+              ></textarea>
+            </label>
+            <div class="capture-foot">
+              <label class="btn btn-quiet upload-btn" title="PDF, JPEG, PNG or HEIC, up to 10 MB">
+                <svg class="icon" aria-hidden="true"><use href="#i-upload" /></svg>
+                Upload a bill or document
+                <input
+                  id="uploadInput"
+                  class="sr-only"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,application/pdf,image/jpeg,image/png,image/heic"
+                />
+              </label>
+              <button class="btn btn-primary" type="submit">Save to Inbox</button>
+            </div>
+          </form>
+          <div class="segmented" role="group" aria-label="Show">
+            <button class="seg" type="button" data-inbox-show="active" aria-pressed="true">Waiting</button>
+            <button class="seg" type="button" data-inbox-show="converted" aria-pressed="false">
+              Turned into tasks
+            </button>
+            <button class="seg" type="button" data-inbox-show="archived" aria-pressed="false">
+              Archived
+            </button>
+          </div>
+          <ul id="inboxList" class="list"></ul>
+        </section>
+
+        <!-- TASKS -->
+        <section id="view-tasks" class="view" aria-labelledby="tasksTitle" hidden>
+          <div class="view-head">
+            <div>
+              <h1 id="tasksTitle" class="view-title">Tasks</h1>
+            </div>
+            <button class="btn btn-primary" type="button" data-new-task>
+              <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg> Task
+            </button>
+          </div>
+          <div class="segmented" role="group" aria-label="Show">
+            <button class="seg" type="button" data-task-show="open" aria-pressed="true">Open</button>
+            <button class="seg" type="button" data-task-show="done" aria-pressed="false">Done</button>
+            <button class="seg" type="button" data-task-show="cancelled" aria-pressed="false">
+              Cancelled
+            </button>
+          </div>
+          <ul id="taskList" class="list"></ul>
+        </section>
+
+        <!-- RECORDS -->
+        <section id="view-records" class="view" aria-labelledby="recordsTitle" hidden>
+          <div class="view-head">
+            <div>
+              <h1 id="recordsTitle" class="view-title">Records</h1>
+            </div>
+          </div>
+          <ul id="recordList" class="list"></ul>
+        </section>
+
+        <!-- REVIEW (opened from an Inbox item: #/review/ID) -->
+        <section id="view-review" class="view" aria-labelledby="reviewTitle" hidden>
+          <div class="view-head">
+            <div>
+              <h1 id="reviewTitle" class="view-title">Review</h1>
+            </div>
+            <a class="btn btn-quiet" href="#/inbox">Back to Inbox</a>
+          </div>
+          <div id="reviewSource" class="review-source"></div>
+          <p id="reviewNote" class="nudge" hidden></p>
+          <form id="reviewForm" class="stack" novalidate>
+            <p class="muted small">
+              Suggestions are only saved when you press <b>Save record</b>. Change anything that's wrong.
+            </p>
+            <div id="reviewFields" class="review-fields"></div>
+            <label class="check">
+              <input id="reviewMakeTask" type="checkbox" checked />
+              <span>Also make a task</span>
+            </label>
+            <div id="reviewTaskFields" class="review-fields">
+              <label class="field">
+                <span class="field-label">Task</span>
+                <input id="reviewTaskTitle" class="input" type="text" maxlength="200" autocomplete="off" />
+              </label>
+              <label class="field">
+                <span class="field-label">Task due date <span class="muted">(optional)</span></span>
+                <input id="reviewTaskDue" class="input" type="date" />
+              </label>
+            </div>
+            <p id="reviewError" class="form-error" role="alert" hidden></p>
+            <div class="review-actions">
+              <button id="reviewReject" class="btn btn-quiet" type="button">Not right: reject</button>
+              <button class="btn btn-primary" type="submit">Save record</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ACTIVITY (opened from Settings) -->
+        <section id="view-activity" class="view" aria-labelledby="activityTitle" hidden>
+          <div class="view-head">
+            <div>
+              <h1 id="activityTitle" class="view-title">Activity</h1>
+            </div>
+            <a class="btn btn-quiet" href="#/settings">Back to Settings</a>
+          </div>
+          <p class="muted small">The history notes what happened, never what your notes or documents say.</p>
+          <ol id="activityList" class="activity-list"></ol>
+          <div><button id="activityMore" class="btn" type="button" hidden>Show older</button></div>
+        </section>
+
+        <!-- SETTINGS: plain sections, rows with a hairline between them -->
+        <section id="view-settings" class="view" aria-labelledby="settingsTitle" hidden>
+          <h1 id="settingsTitle" class="view-title">Settings</h1>
+
+          <section class="set" aria-labelledby="setAccount">
+            <h2 id="setAccount" class="set-title">Account</h2>
+            <div class="set-row">
+              <span>Username</span>
+              <span id="accountEmail" class="set-value"></span>
+            </div>
+            <div class="set-row">
+              <span>Two-step login <span id="twoStepState" class="set-value"></span></span>
+              <button id="twoStepBtn" class="link-btn" type="button">Turn on</button>
+            </div>
+          </section>
+
+          <section class="set" aria-labelledby="setTime">
+            <h2 id="setTime" class="set-title">Time</h2>
+            <label class="set-row">
+              <span>Timezone</span>
+              <select id="timezoneSelect" class="input input--inline"></select>
+            </label>
+            <label class="set-row">
+              <span>Reminder time</span>
+              <input id="reminderTime" class="input input--inline" type="time" step="900" />
+            </label>
+          </section>
+
+          <section class="set" aria-labelledby="setReminders">
+            <h2 id="setReminders" class="set-title">Reminders on this device</h2>
+            <p id="pushStatus" class="set-note" role="status"></p>
+            <div class="set-actions">
+              <button id="pushOnBtn" class="link-btn" type="button">Turn on</button>
+              <button id="pushTestBtn" class="link-btn" type="button" hidden>Send a test</button>
+              <button id="pushOffBtn" class="link-btn link-btn--muted" type="button" hidden>Turn off</button>
+            </div>
+          </section>
+
+          <section class="set" aria-labelledby="setReader">
+            <h2 id="setReader" class="set-title">Document reader</h2>
+            <label class="set-field">
+              <span class="sr-only">Who reads your uploads</span>
+              <select id="readerSelect" class="input">
+                <option value="mock">Built-in (free, offline, PDFs with text)</option>
+                <option value="local">On this Mac (Ollama: free, private)</option>
+                <option value="claude">Claude (PDFs and photos; sent to Anthropic)</option>
+              </select>
+            </label>
+            <p id="readerHelp" class="set-note"></p>
+          </section>
+
+          <section class="set" aria-labelledby="setData">
+            <h2 id="setData" class="set-title">Your data</h2>
+            <a class="set-row set-link" href="#/activity"
+              >Activity history <span aria-hidden="true">›</span></a
+            >
+            <a class="set-row set-link" href="/api/export" download>
+              Export everything (.zip) <span aria-hidden="true">›</span>
+            </a>
+            <button class="set-row set-link danger-text" type="button" data-delete="data">
+              Delete all my data
+            </button>
+            <button class="set-row set-link danger-text" type="button" data-delete="account">
+              Delete my account
+            </button>
+          </section>
+
+          <details class="set privacy">
+            <summary class="set-title privacy-summary">Privacy</summary>
+            <ul class="privacy-list">
+              <li>
+                <b>What:</b> your notes, uploaded documents, the facts you confirm, tasks, reminders and a
+                history of actions (never their content).
+              </li>
+              <li>
+                <b>Where:</b> on this computer, in the LifeOps <code>data</code> folder. Nothing is uploaded
+                anywhere, except a document you choose to have read by Claude (when switched on).
+              </li>
+              <li>
+                <b>Claude:</b> only the document being read is sent to Anthropic, with location data removed
+                from photos. LifeOps never sends it anything else.
+              </li>
+              <li>
+                <b>How long:</b> until you delete it. Rejected suggestions: 90 days. Duplicate-protection
+                keys: 30 days. Old reminders: 90 days. Activity history: 1 year.
+              </li>
+              <li>
+                <b>Your rights:</b> see everything (Activity), take a copy (Export), remove everything
+                (Delete), on this page.
+              </li>
+              <li><b>Updated:</b> 16 November 2026.</li>
+            </ul>
+          </details>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===================== 3. OVERLAYS ===================== -->
+    <dialog id="taskDialog" class="dialog" aria-labelledby="taskDialogTitle">
+      <form id="taskForm" method="dialog" class="dialog-form" novalidate>
+        <h2 id="taskDialogTitle" class="dialog-title">New task</h2>
+        <label class="field">
+          <span class="field-label">What needs doing?</span>
+          <input id="taskTitle" class="input" type="text" maxlength="200" required autocomplete="off" />
+        </label>
+        <label class="field">
+          <span class="field-label">Due date <span class="muted">(optional)</span></span>
+          <input id="taskDue" class="input" type="date" />
+        </label>
+        <label class="field">
+          <span class="field-label">Category</span>
+          <select id="taskCategory" class="input">
+            <option value="bills">Bills</option>
+            <option value="warranty">Warranty</option>
+            <option value="renewal">Renewal</option>
+            <option value="home">Home</option>
+            <option value="health">Health</option>
+            <option value="vehicle">Vehicle</option>
+            <option value="other" selected>Other</option>
+          </select>
+        </label>
+        <label class="field" id="taskDetailsField">
+          <span class="field-label">Notes <span class="muted">(optional)</span></span>
+          <textarea id="taskDetails" class="input input--area" rows="3" maxlength="5000"></textarea>
+        </label>
+        <p id="taskError" class="form-error" role="alert" hidden></p>
+        <div class="dialog-foot">
+          <button class="btn btn-quiet" type="button" data-close>Cancel</button>
+          <button class="btn btn-primary" type="submit">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="confirmDialog" class="dialog dialog--small" aria-labelledby="confirmTitle">
+      <div class="dialog-form">
+        <h2 id="confirmTitle" class="dialog-title">Are you sure?</h2>
+        <p id="confirmText" class="muted"></p>
+        <div class="dialog-foot">
+          <button class="btn btn-quiet" type="button" data-close>Keep it</button>
+          <button id="confirmBtn" class="btn btn-danger" type="button">Delete</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="twoStepDialog" class="dialog dialog--small" aria-labelledby="twoStepTitle">
+      <form id="twoStepForm" class="dialog-form" novalidate>
+        <h2 id="twoStepTitle" class="dialog-title">Two-step login</h2>
+        <p id="twoStepText" class="muted"></p>
+        <div id="twoStepQr" class="qr" hidden></div>
+        <p id="twoStepKey" class="key" hidden></p>
+        <label id="twoStepPasswordField" class="field">
+          <span class="field-label">Your password</span>
+          <input id="twoStepPassword" class="input" type="password" autocomplete="current-password" />
+        </label>
+        <label id="twoStepCodeField" class="field" hidden>
+          <span class="field-label">6-digit code from the app</span>
+          <input
+            id="twoStepCode"
+            class="input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="20"
+          />
+        </label>
+        <ol id="twoStepCodes" class="codes" hidden></ol>
+        <p id="twoStepError" class="form-error" role="alert" hidden></p>
+        <div class="dialog-foot">
+          <button id="twoStepCancel" class="btn btn-quiet" type="button" data-close>Cancel</button>
+          <button id="twoStepSubmit" class="btn btn-primary" type="submit">Continue</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="deleteDialog" class="dialog dialog--small" aria-labelledby="deleteTitle">
+      <form id="deleteForm" class="dialog-form" novalidate>
+        <h2 id="deleteTitle" class="dialog-title">Delete all my data?</h2>
+        <p id="deleteText" class="muted"></p>
+        <label class="field">
+          <span class="field-label">Your password</span>
+          <input id="deletePassword" class="input" type="password" autocomplete="current-password" required />
+        </label>
+        <label class="field">
+          <span class="field-label">Type DELETE to confirm</span>
+          <input
+            id="deleteConfirm"
+            class="input"
+            type="text"
+            autocomplete="off"
+            autocapitalize="characters"
+            required
+          />
+        </label>
+        <p id="deleteError" class="form-error" role="alert" hidden></p>
+        <div class="dialog-foot">
+          <button class="btn btn-quiet" type="button" data-close>Keep everything</button>
+          <button class="btn btn-danger" type="submit">Delete</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" hidden></div>
+    <p id="announcer" class="sr-only" role="status" aria-live="polite"></p>
+
+    <script src="assets/js/qrcode.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+# Personal data: the database and uploaded files never go into Git
+data/
+data-before-restore-*/
+backups/
+*.sqlite3
+*.sqlite3-*
+# Private notes for Claude (the owner's decisions and process)
+CLAUDE.local.md
+# Secrets
+.env
+.env.*
+!.env.example
+# Tools and test leftovers
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+node_modules/
+.playwright-cli/
+.DS_Store

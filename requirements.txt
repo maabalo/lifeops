@@ -1,0 +1,12 @@
+# LifeOps: direct dependencies, pinned. Full pinned tree (with sub-dependencies): requirements.lock
+# Install: python3 -m venv .venv && .venv/bin/pip install -r requirements.lock
+fastapi==0.163.1
+uvicorn==0.54.0
+python-multipart==0.0.33
+argon2-cffi==25.1.0
+pypdf==7.1.0
+pywebpush==2.5.0          # push reminders (M4)
+anthropic==2.8.0          # Claude reads documents (M5, off unless ANTHROPIC_API_KEY is set)
+# tests
+pytest==9.2.0
+httpx==0.28.1
