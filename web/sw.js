@@ -6,7 +6,7 @@
    Bump CACHE when the shell list changes; old caches are deleted on activate. */
 'use strict';
 
-const CACHE = 'lifeops-shell-v2';
+const CACHE = 'lifeops-shell-v3';
 const SHELL = [
   '/',
   '/offline.html',

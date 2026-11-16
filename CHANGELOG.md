@@ -2,6 +2,10 @@
 
 Updates to this project, newest first.
 
+## 1.0.1
+### Changed
+- New icon: a sprout (two leaves on a stem) for "life", in the top bar, the browser tab and the Home Screen app icons (192, 512, 180 for iPhone, and the maskable one for Android). The service worker cache is bumped so installed apps pick it up.
+
 ## 1.0.0 — first public version
 ### Added
 - Login with a username; the first account is created on the page (only on the computer running LifeOps). Optional two-step login with an authenticator app and one-time recovery codes.
