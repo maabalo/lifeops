@@ -2,6 +2,16 @@
 
 Updates to this project, newest first.
 
+## 1.1.0
+### Added
+- **Windows support:** double-click `start.bat` (Windows) or `start.command` (macOS; Linux: `sh start.command`). The first start sets everything up, then LifeOps starts and opens in the browser. Needs Python 3.12 or newer.
+- **Tests on Windows, macOS and Linux** (GitHub Actions, on every push): all backend tests, plus a check that the real server starts. Read-only, no secrets.
+
+### Changed
+- "On this Mac" is now "On this computer" in Settings (the local Ollama reader works on Windows too).
+- iPhone HEIC photos on Windows and Linux: a clear message to upload JPEG instead (macOS still converts them).
+- README: run steps for Windows, macOS and Linux.
+
 ## 1.0.1
 ### Changed
 - New icon: a sprout (two leaves on a stem) for "life", in the top bar, the browser tab and the Home Screen app icons (192, 512, 180 for iPhone, and the maskable one for Android). The service worker cache is bumped so installed apps pick it up.

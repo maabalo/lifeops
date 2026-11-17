@@ -1,7 +1,7 @@
 """
 LifeOps web app: the API (/api/...) and the page (web/), served by one small FastAPI server.
 
-    .venv/bin/uvicorn --factory app.main:create_app --port 8780     # http://127.0.0.1:8780 on this Mac
+    .venv/bin/uvicorn --factory app.main:create_app --port 8780     # http://127.0.0.1:8780 on this computer
 
 (create_app is called when the server starts, so importing this file has no side effects.)
 

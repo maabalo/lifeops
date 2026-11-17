@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import sys
 from contextlib import closing
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -93,7 +94,9 @@ def test_push_key_is_made_once_and_kept_private(me, app):
     first = me.get("/api/push/key").json()["public_key"]
     assert first == me.get("/api/push/key").json()["public_key"]
     key_file = app.state.settings.data_dir / "vapid_private.pem"
-    assert key_file.is_file() and (key_file.stat().st_mode & 0o077) == 0
+    assert key_file.is_file()
+    if sys.platform != "win32":  # Windows has no Unix permission bits
+        assert (key_file.stat().st_mode & 0o077) == 0
 
 
 def test_housekeeping_removes_only_old_things(me, app):
@@ -121,7 +124,9 @@ def test_backup_and_restore_round_trip(me, app, tmp_path):
     me.post("/api/tasks", json={"title": "Keep me"})
     folder = backup.backup(app.state.settings, into=tmp_path / "backups")
     assert backup.check(folder) == 1
-    assert (folder / "files").is_dir() and (folder / "lifeops.sqlite3").stat().st_mode & 0o077 == 0
+    assert (folder / "files").is_dir()
+    if sys.platform != "win32":  # Windows has no Unix permission bits
+        assert (folder / "lifeops.sqlite3").stat().st_mode & 0o077 == 0
     me.post("/api/account/delete", json={"scope": "data", "password": "correct horse battery staple", "confirm": "DELETE"})
     aside = backup.restore(app.state.settings, folder)
     assert aside.is_dir()  # the data before the restore was kept, not lost

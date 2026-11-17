@@ -173,17 +173,27 @@ def check_and_store(data: bytes, original_name: str | None, folder: Path) -> Sto
     )
 
 
+SIPS = Path("/usr/bin/sips")  # macOS's built-in image tool; Windows and Linux don't have it
+NO_HEIC_HERE = (
+    "This iPhone photo (HEIC) can't be read on this computer. Upload it as a JPEG instead "
+    "(on iPhone: Settings → Camera → Formats → Most Compatible)."
+)
+
+
 def heic_to_jpeg(data: bytes) -> bytes:
-    """Convert an iPhone HEIC photo to JPEG with macOS's built-in `sips`, then remove its metadata."""
+    """Convert an iPhone HEIC photo to JPEG with macOS's built-in `sips`, then remove its metadata.
+    Elsewhere (Windows, Linux) there's no built-in converter: a plain reason instead of an error."""
     import subprocess
     import tempfile
 
+    if not SIPS.is_file():
+        raise DocumentError(NO_HEIC_HERE)
     with tempfile.TemporaryDirectory() as folder:
         source, target = Path(folder) / "in.heic", Path(folder) / "out.jpg"
         source.write_bytes(data)
         try:
             subprocess.run(
-                ["/usr/bin/sips", "-s", "format", "jpeg", str(source), "--out", str(target)],
+                [str(SIPS), "-s", "format", "jpeg", str(source), "--out", str(target)],
                 check=True, capture_output=True, timeout=60,
             )  # fmt: skip
         except (OSError, subprocess.SubprocessError):

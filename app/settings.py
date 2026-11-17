@@ -2,7 +2,7 @@
 LifeOps settings: read from environment variables only (never hard-coded secrets).
 
     LIFEOPS_DATA_DIR       where the database and uploaded files live (default: ./data, git-ignored)
-    LIFEOPS_COOKIE_SECURE  "1" when served over HTTPS (online); "0" for http://127.0.0.1 on this Mac
+    LIFEOPS_COOKIE_SECURE  "1" when served over HTTPS (online); "0" for http://127.0.0.1 on this computer
     LIFEOPS_SESSION_DAYS   how long a login lasts (default 14)
     LIFEOPS_TIMEZONE       default timezone for new accounts (default Asia/Manila)
     LIFEOPS_SCHEDULER_SECONDS  how often reminders are checked (default 60; 0 turns the scheduler off)

@@ -1495,15 +1495,15 @@
   function readerHelp(me) {
     if (me.extractor === 'local') {
       return me.local_model
-        ? `Uses ${me.local_model} on this Mac: nothing leaves your computer. Photos need a vision model.`
+        ? `Uses ${me.local_model} on this computer: nothing leaves it. Photos need a vision model.`
         : "Ollama isn't running. Open the Ollama app; until then uploads stop with a Try again button.";
     }
     if (me.extractor === 'claude') {
       return 'Claude reads photos and scans too. Only the document being read is sent.';
     }
     const local = me.local_model
-      ? `On this Mac uses ${me.local_model}.`
-      : 'On this Mac needs the Ollama app open with a model.';
+      ? `On this computer uses ${me.local_model}.`
+      : 'On this computer needs the Ollama app open with a model.';
     const claude = me.claude_available ? '' : ' Claude needs an ANTHROPIC_API_KEY on the server.';
     return local + claude;
   }
@@ -1512,7 +1512,7 @@
     try {
       state.me = await api('/api/me', { method: 'PATCH', body: { extractor: els.readerSelect.value } });
       state.csrf = state.me.csrf_token;
-      const names = { claude: 'Claude', local: 'The model on this Mac', mock: 'The built-in reader' };
+      const names = { claude: 'Claude', local: 'The model on this computer', mock: 'The built-in reader' };
       showToast(`${names[state.me.extractor]} will read new uploads`);
       els.readerHelp.textContent = readerHelp(state.me);
     } catch (error) {

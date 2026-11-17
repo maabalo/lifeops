@@ -1,0 +1,44 @@
+# Runs the backend tests on Windows, macOS and Linux on every push, then starts the real server once
+# to check it boots. Read-only: no secrets, no deploys. Claude and Ollama are faked in the tests.
+name: tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    name: ${{ matrix.os }} · Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        python: ['3.14']
+        include:
+          - os: ubuntu-latest
+            python: '3.12' # the oldest Python the start scripts accept
+    steps:
+      # Official actions, pinned to exact commits (v7.0.1 and v7.1.0)
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install
+        run: python -m pip install --disable-pip-version-check -r requirements.lock
+      - name: Tests
+        run: python -m pytest -q -p no:cacheprovider
+      - name: Server starts
+        shell: bash
+        env:
+          LIFEOPS_DATA_DIR: ${{ runner.temp }}/lifeops-data
+          LIFEOPS_SCHEDULER_SECONDS: '0'
+        run: |
+          python -m uvicorn --factory app.main:create_app --host 127.0.0.1 --port 8780 &
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8780/api/setup; then echo; echo "LifeOps started"; exit 0; fi
+            sleep 1
+          done
+          echo "LifeOps didn't start within 30 seconds"; exit 1

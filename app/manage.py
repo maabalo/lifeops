@@ -1,5 +1,5 @@
 """
-LifeOps account tool (Terminal only; there is no public sign-up page).
+LifeOps account tool (Terminal or Command Prompt; there is no public sign-up page).
 
     .venv/bin/python -m app.manage create-user alex               # asks for a password (hidden)
     .venv/bin/python -m app.manage set-password alex

@@ -11,31 +11,48 @@ expiring soon) · Activity history · export everything (ZIP), delete all data /
 push reminders, backups, housekeeping, privacy notice.
 **Not yet:** hosting online (HTTPS, hosted backups).
 
-## Run it on this Mac
+## Run it (Windows, macOS or Linux)
 
-Needs Python 3.11+.
+You need **Python 3.12 or newer** (free: https://www.python.org/downloads/; on Windows tick "Add python.exe to PATH").
+Download LifeOps (green **Code** button → **Download ZIP**, then unzip it), then:
 
-```sh
-cd 07/LifeOps
-python3 -m venv .venv && .venv/bin/pip install -r requirements.lock      # first time only
-.venv/bin/uvicorn --factory app.main:create_app --port 8780
-```
+| | Start LifeOps |
+|---|---|
+| **Windows** | Double-click **`start.bat`** |
+| **macOS** | Double-click **`start.command`** (the first time: right-click → Open, because it was downloaded) |
+| **Linux** | `sh start.command` |
 
-Open http://127.0.0.1:8780. The first time, it asks you to **create your account** (this works only on the
-computer running LifeOps, and only while there is no account). After that, log in. Press Ctrl+C in Terminal to stop.
+The first start sets everything up (about a minute); after that it starts in seconds and opens
+http://127.0.0.1:8780 in your browser. The first time, it asks you to **create your account** (this works only on the
+computer running LifeOps, and only while there is no account). After that, log in. Close the window (or press Ctrl+C)
+to stop LifeOps.
 
 Your data lives in `data/` (the database `lifeops.sqlite3`); it is git-ignored and never uploaded.
 
-Other account commands: `python -m app.manage set-password <username>`, `python -m app.manage logout-everywhere <username>`,
-`python -m app.manage disable-2fa <username>` (turns two-step login off if you lose your phone and recovery codes).
+<details><summary>By hand, without the start scripts</summary>
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.lock            # Windows: .venv\Scripts\pip install -r requirements.lock
+.venv/bin/uvicorn --factory app.main:create_app --port 8780   # Windows: .venv\Scripts\uvicorn ...
+```
+</details>
+
+Other account commands (in Terminal, or Command Prompt on Windows, inside the LifeOps folder; Windows: use
+`.venv\Scripts\python` instead of `python`): `python -m app.manage set-password <username>`,
+`python -m app.manage logout-everywhere <username>`, `python -m app.manage disable-2fa <username>` (turns two-step
+login off if you lose your phone and recovery codes).
+
+**Windows note:** iPhone HEIC photos can't be read there (macOS converts them with a built-in tool). Upload JPEG
+instead: on iPhone, Settings → Camera → Formats → Most Compatible. PDFs, JPEG and PNG work everywhere.
 
 ## A local model as the reader (optional, free)
 
-1. Open the Ollama app, then download a model once in Terminal: `ollama pull gemma3:12b` (about 8 GB; it reads
+1. Install Ollama (https://ollama.com, Windows, macOS and Linux), open it, then download a model once in Terminal or Command Prompt: `ollama pull gemma3:12b` (about 8 GB; it reads
    PDFs and photos). A smaller one: `ollama pull qwen2.5vl:7b`.
-2. In LifeOps: Settings → Document reader → **On this Mac (Ollama)** → Save.
+2. In LifeOps: Settings → Document reader → **On this computer (Ollama)** (it saves straight away).
 
-Nothing leaves this Mac. Keep Ollama open while uploading; if it's closed, the upload stops with Try again.
+Nothing leaves your computer. Keep Ollama open while uploading; if it's closed, the upload stops with Try again.
 Scanned PDFs without text can't be read by the local model (photos can). `LIFEOPS_OLLAMA_MODEL` picks the model.
 
 ## Settings (environment variables)
@@ -81,7 +98,7 @@ HTTPS), `LIFEOPS_SESSION_DAYS`, `LIFEOPS_TIMEZONE` (default for new accounts). N
 | `app/push.py` | Web Push: VAPID key, allowed push services, sending |
 | `app/backup.py` | Backup and restore (with integrity check) |
 | `app/claude_reader.py` | Claude as the reader: request, strict output schema, plain-words errors |
-| `app/local_reader.py` | A local model (Ollama on this Mac) as the reader: same form and checks, this computer only |
+| `app/local_reader.py` | A local model (Ollama on this computer) as the reader: same form and checks, this computer only |
 | `app/manage.py` | Account, backup and restore commands (no public sign-up) |
 | `migrations/` | Numbered SQL files, applied in order on start |
 | `web/` | The page: `index.html`, `assets/css/style.css`, `assets/js/app.js` |

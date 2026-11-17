@@ -40,6 +40,11 @@ Read this first when working here. Update it whenever the process, a decision or
 - Page files are served with `Cache-Control: no-cache` (browsers kept stale JS before).
 - SQLite connections use `check_same_thread=False` (opened in middleware, used on FastAPI's worker thread; one connection per request).
 
+## Platforms
+- Runs on Windows, macOS and Linux (Python 3.12+). `start.bat` / `start.command` create `.venv` on first run, install `requirements.lock`, start uvicorn on 127.0.0.1:8780 and open the browser. `.gitattributes` keeps `.bat` CRLF and `.command` LF; `start.command` must stay executable.
+- GitHub Actions (`.github/workflows/tests.yml`): tests on windows/macos/ubuntu (3.14) + ubuntu 3.12, then a real server start. Actions pinned to commit SHAs; `permissions: contents: read`. Keep all three green.
+- Platform-specific bits: HEIC conversion uses macOS `sips` (`documents.SIPS`); elsewhere `NO_HEIC_HERE` tells users to upload JPEG. File-permission checks in tests are skipped on Windows (no Unix permission bits). Use "this computer", never "this Mac", in the UI.
+
 ## Run, test
 - Tests: `.venv/bin/python -m pytest -q -p no:cacheprovider` (then delete `__pycache__/`). Web lint: `npm run lint` in a temporary copy with the pinned tools, then delete the copy.
 - Browser tests: a throwaway data dir (`LIFEOPS_DATA_DIR`) and a throwaway account; delete both afterwards. Never test on `data/`.

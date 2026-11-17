@@ -145,6 +145,15 @@ def test_heic_conversion_failure_is_a_plain_reason():
         for_claude(Source([], b"\x00\x00\x00\x18ftypheic-not-really", "image/heic"))
 
 
+def test_heic_without_a_converter_says_to_use_jpeg(monkeypatch, tmp_path):
+    """Windows and Linux have no built-in HEIC converter: the reader explains instead of failing oddly."""
+    from app import documents
+
+    monkeypatch.setattr(documents, "SIPS", tmp_path / "no-sips-here")
+    with pytest.raises(documents.DocumentError, match="Upload it as a JPEG"):
+        documents.for_claude(Source([], b"\x00\x00\x00\x18ftypheic", "image/heic"))
+
+
 def test_schema_requires_every_field():
     assert claude_reader.OUTPUT_SCHEMA["required"] == list(FIELDS)
     assert claude_reader.OUTPUT_SCHEMA["additionalProperties"] is False
