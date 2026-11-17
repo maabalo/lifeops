@@ -2,6 +2,10 @@
 
 Updates to this project, newest first.
 
+## 1.1.1
+### Fixed
+- **Windows:** the Today dashboard, due dates and reminders failed there, because Windows has no built-in timezone data. LifeOps now installs Python's official `tzdata` package on Windows only (found by the new Windows tests).
+
 ## 1.1.0
 ### Added
 - **Windows support:** double-click `start.bat` (Windows) or `start.command` (macOS; Linux: `sh start.command`). The first start sets everything up, then LifeOps starts and opens in the browser. Needs Python 3.12 or newer.

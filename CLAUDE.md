@@ -43,6 +43,7 @@ Read this first when working here. Update it whenever the process, a decision or
 ## Platforms
 - Runs on Windows, macOS and Linux (Python 3.12+). `start.bat` / `start.command` create `.venv` on first run, install `requirements.lock`, start uvicorn on 127.0.0.1:8780 and open the browser. `.gitattributes` keeps `.bat` CRLF and `.command` LF; `start.command` must stay executable.
 - GitHub Actions (`.github/workflows/tests.yml`): tests on windows/macos/ubuntu (3.14) + ubuntu 3.12, then a real server start. Actions pinned to commit SHAs; `permissions: contents: read`. Keep all three green.
+- Windows has no system timezone database: `tzdata` is pinned for `sys_platform == "win32"` in requirements.txt/.lock (without it every ZoneInfo call fails). Keep it in step with Python's zoneinfo docs.
 - Platform-specific bits: HEIC conversion uses macOS `sips` (`documents.SIPS`); elsewhere `NO_HEIC_HERE` tells users to upload JPEG. File-permission checks in tests are skipped on Windows (no Unix permission bits). Use "this computer", never "this Mac", in the UI.
 
 ## Run, test
